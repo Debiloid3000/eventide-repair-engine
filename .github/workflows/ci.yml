@@ -1,0 +1,81 @@
+name: Engine CI & Health Check
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  engine-sanity-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Скачиваем репозиторий движка
+      - name: Checkout Engine Code
+        uses: actions/checkout@v4
+
+      # 2. Настраиваем окружение
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # 3. Устанавливаем зависимости (если есть requirements.txt)
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # 4. Проверка синтаксиса Python во всех папках движка
+      - name: Python Syntax & Compile Check
+        run: |
+          python -m compileall core/ local/ workflow/ repair_engine.py
+
+      # 5. Проверка корректности импортов всех Core-модулей
+      - name: Test Core Modules Imports
+        run: |
+          python -c "
+          import core.orchestrator
+          import core.workspace
+          import core.builder
+          import core.diagnostics
+          import core.repair
+          import core.genesis_porter
+          import core.resource_resolver
+          import core.project_analyzer
+          import core.symbol_analyzer
+          import core.dependency_resolver
+          import core.duplicate_detector
+          import core.genesis_analyzer
+          import core.adaptation_engine
+          import core.prototype_analyzer
+          import core.patch_manager
+          import core.rollback_manager
+          import core.validation_manager
+          import core.report_manager
+          import core.config
+          import core.models
+          print('✅ Все модули Core успешно импортируются!')
+          "
+
+      # 6. Тестовый запуск Local Adapter в режиме Dry-Run
+      - name: Test Local Adapter (Dry-Run)
+        run: |
+          python local/run.py --mode 1 --dry-run --target .
+
+      # 7. Тестовый запуск Workflow Adapter в режиме Dry-Run
+      - name: Test Workflow Adapter (Dry-Run)
+        env:
+          INPUT_MODE: "1"
+          INPUT_CONFIGURATION: "Debug"
+          INPUT_TARGET: "."
+          DRY_RUN: "true"
+        run: |
+          python workflow/run.py
