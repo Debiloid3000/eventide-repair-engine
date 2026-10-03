@@ -41,19 +41,7 @@ jobs:
       # 5. Проверка корректности импортов всех Core-модулей
       - name: Test Core Modules Imports
         run: |
-          python -c "
-          import core.orchestrator
-          import core.workspace
-          import core.builder
-          import core.diagnostics
-          import core.repair
-          import core.genesis_porter
-          import core.resource_resolver
-          import core.config
-          import core.models
-          print('✅ Доступные модули Core успешно импортируются!')
-          "
-          "
+          python -c "import core.orchestrator; import core.workspace; import core.builder; import core.diagnostics; import core.repair; import core.genesis_porter; import core.resource_resolver; import core.config; import core.models; print('✅ Доступные модули Core успешно импортируются!')"
 
       # 6. Тестовый запуск Local Adapter в режиме Dry-Run
       - name: Test Local Adapter (Dry-Run)
