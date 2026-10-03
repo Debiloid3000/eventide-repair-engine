@@ -1,5 +1,3 @@
-# core/rollback_manager.py
-import shutil
 from pathlib import Path
 from typing import List
 from core.models import PatchRecord
@@ -9,11 +7,9 @@ class RollbackManager:
         self.workspace = workspace
 
     def revert_patch(self, patch: PatchRecord) -> bool:
-        """Безопасный откат конкретного патча без разрушительных 'git reset --hard'."""
         target_file = Path(self.workspace.target_dir) / patch.file_path
         if not target_file.exists():
             return False
-        
         try:
             target_file.write_text(patch.before_content, encoding="utf-8")
             patch.validation = "rolled_back"
