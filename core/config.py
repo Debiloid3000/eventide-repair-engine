@@ -1,7 +1,6 @@
-# core/config.py
 import json
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional
+from typing import Dict
 from pathlib import Path
 
 @dataclass
