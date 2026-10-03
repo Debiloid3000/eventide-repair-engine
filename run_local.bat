@@ -15,30 +15,39 @@ echo.
 
 set /p mode="Введи цифру (1-4): "
 
+if "%mode%"=="4" goto end
+if not "%mode%"=="1" if not "%mode%"=="2" if not "%mode%"=="3" (
+    echo Неверный выбор.
+    goto end
+)
+
+echo.
+echo Введи путь к целевому проекту (project-eventide-14).
+echo Оставь пустым и нажми Enter, чтобы использовать текущую папку.
+set /p target_path="Путь: "
+
+if "%target_path%"=="" set target_path=.
+
 if "%mode%"=="1" goto mode1
 if "%mode%"=="2" goto mode2
 if "%mode%"=="3" goto dryrun
-if "%mode%"=="4" goto end
-
-echo Неверный выбор.
-goto end
 
 :mode1
 echo.
 echo [LOCAL] Запускаем MODE 1 (Repair Only)...
-python local\run.py --mode 1
+python local\run.py --mode 1 --target "%target_path%"
 goto finish
 
 :mode2
 echo.
 echo [LOCAL] Запускаем MODE 2 (Repair + Clone + Adapt)...
-python local\run.py --mode 2
+python local\run.py --mode 2 --target "%target_path%"
 goto finish
 
 :dryrun
 echo.
 echo [LOCAL] Запускаем тестовый прогон (Dry-Run)...
-python local\run.py --mode 1 --dry-run
+python local\run.py --mode 1 --dry-run --target "%target_path%"
 goto finish
 
 :finish
