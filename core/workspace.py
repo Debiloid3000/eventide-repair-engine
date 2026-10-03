@@ -1,9 +1,8 @@
-# core/workspace.py
 import subprocess
 import shutil
 import time
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 class WorkspaceManager:
     def __init__(self, target_dir: str, work_dir: str = ".repair_workspace"):
@@ -30,7 +29,6 @@ class WorkspaceManager:
         cp_path = self.checkpoints_dir / f"checkpoint_{tag}_{timestamp}"
         cp_path.mkdir(parents=True, exist_ok=True)
         
-        # Индексируем и сохраняем текущие измененные файлы (без сброса git)
         modified_files = self.get_dirty_files()
         for rel_file in modified_files:
             src = self.target_dir / rel_file
