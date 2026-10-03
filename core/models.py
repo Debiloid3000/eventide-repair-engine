@@ -1,8 +1,6 @@
-# core/models.py
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Any
-from pathlib import Path
+from typing import List, Optional
 
 class ExecutionMode(Enum):
     REPAIR_ONLY = 1
