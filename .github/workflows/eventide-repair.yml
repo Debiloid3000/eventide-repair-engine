@@ -1,4 +1,5 @@
 name: Eventide Repair Engine
+
 on:
   workflow_dispatch:
     inputs:
@@ -8,21 +9,54 @@ on:
 jobs:
   repair:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      # 1. Выкачиваем сам движок
+      - name: Checkout Repair Engine
+        uses: actions/checkout@v4
+        with:
+          path: engine
+
+      # 2. Выкачиваем целевой проект project-eventide-14
+      - name: Checkout Target Repo
+        uses: actions/checkout@v4
+        with:
+          repository: 'Debiloid3000/project-eventide-14'
+          token: ${{ secrets.GH_PAT }}
+          path: target_repo
+
       - uses: actions/setup-dotnet@v4
         with: { dotnet-version: '8.0.x' }
+
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
+
+      # 3. Запускаем движок, передавая путь к target_repo
       - name: Run Workflow Adapter
         env:
           INPUT_MODE: ${{ github.event.inputs.mode }}
           INPUT_CONFIGURATION: ${{ github.event.inputs.configuration }}
-          INPUT_TARGET: '.'
-        run: python workflow/run.py
+          INPUT_TARGET: './target_repo'
+        run: |
+          cd engine
+          python workflow/run.py
+
+      # 4. Пушим изменения и создаем Pull Request в project-eventide-14
+      - name: Create Pull Request in Target Repo
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GH_PAT }}
+          path: ./target_repo
+          commit-message: "fix(engine): automated repair pass"
+          branch: "auto-repair/mode-${{ github.event.inputs.mode }}"
+          title: "🤖 Auto-Repair Pass (Mode ${{ github.event.inputs.mode }})"
+          body: "Автоматический ремонт и адаптация от `eventide-repair-engine`."
+          base: master
+
+      # 5. Сохраняем отчеты в артефакты
       - name: Upload Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: repair-reports
-          path: reports/
+          path: target_repo/reports/
